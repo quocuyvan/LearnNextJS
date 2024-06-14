@@ -1,28 +1,9 @@
 import type { Metadata } from "next";
-// import { Inter } from "next/font/google";
-import localFont from "next/font/local";
+import { Inter } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
-// const inter = Inter({ subsets: ["latin"] });
-
-const myFont = localFont({
-    src: [
-        {
-            path: "./Roboto-Thin.ttf",
-            weight: "100",
-        },
-        {
-            path: "./Roboto-Regular.ttf",
-            weight: "400",
-        },
-        {
-            path: "./Roboto-Bold.ttf",
-            weight: "700",
-        },
-    ],
-    display: "swap",
-    variable: "--font-roboto",
-});
+const inter = Inter({ subsets: ["vietnamese"] });
 
 export const metadata: Metadata = {
     title: "Create Next App",
@@ -35,8 +16,12 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
-            <body className={myFont.variable}>{children}</body>
+        <html lang="en" suppressHydrationWarning>
+            <body className={inter.className} suppressHydrationWarning>
+                <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+                    {children}
+                </ThemeProvider>
+            </body>
         </html>
     );
 }
