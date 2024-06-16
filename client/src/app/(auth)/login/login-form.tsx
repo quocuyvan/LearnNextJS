@@ -1,18 +1,19 @@
 "use client";
 
-import { useAppContext } from "@/AppProvider";
+import authApiRequest from "@/apiRequests/auth";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import envConfig from "@/config";
+import { clientSessionToken } from "@/lib/http";
 import { LoginBody, LoginBodyType } from "@/schemaValidations/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 const LoginForm = () => {
     const { toast } = useToast();
-    const { setSessionToken } = useAppContext();
+    const router = useRouter();
 
     const form = useForm<LoginBodyType>({
         resolver: zodResolver(LoginBody),
@@ -24,44 +25,12 @@ const LoginForm = () => {
 
     async function onSubmit(values: LoginBodyType) {
         try {
-            const result = await fetch(`${envConfig.NEXT_PUBLIC_API_ENDPOINT}/auth/login`, {
-                body: JSON.stringify(values),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                method: "POST",
-            }).then(async res => {
-                const payload = await res.json();
-                const data = {
-                    status: res.status,
-                    payload,
-                };
-                if (!res.ok) {
-                    throw data;
-                }
-                return data;
-            });
+            const result = await authApiRequest.login(values);
             toast({
                 description: result.payload.message,
             });
-            const resultFromNextServer = await fetch("/api/auth", {
-                method: "POST",
-                body: JSON.stringify(result),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }).then(async res => {
-                const payload = await res.json();
-                const data = {
-                    status: res.status,
-                    payload,
-                };
-                if (!res.ok) {
-                    throw data;
-                }
-                return data;
-            });
-            setSessionToken(resultFromNextServer.payload.data.token);
+            await authApiRequest.auth({ sessionToken: result.payload.data.token });
+            router.push("/me");
         } catch (error: any) {
             const errors = error.payload.errors as { field: string; message: string }[];
             const status = error.status as number;
