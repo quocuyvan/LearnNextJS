@@ -19,9 +19,13 @@ export const handleErrorApi = ({ error, setError, duration }: { error: any; setE
     } else {
         toast({
             title: "Error",
-            description: error.payload.message ?? "Unknown error",
+            description: error.payload?.message ?? "Unknown error",
             variant: "destructive",
             duration: duration ?? 5000,
         });
     }
+};
+
+export const normalizePath = (path: string) => {
+    return path.startsWith("/") ? path.slice(1) : path;
 };

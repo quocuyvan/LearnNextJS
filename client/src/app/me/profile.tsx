@@ -11,7 +11,7 @@ export default function Profile() {
                 const result = await accountApiRequest.meClient();
                 console.log("result client", result); //log trên client port 3000
             } catch (error) {
-                handleErrorApi(error as any);
+                handleErrorApi({ error });
             }
         };
         fetchRequest();
